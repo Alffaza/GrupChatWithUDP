@@ -19,6 +19,10 @@ void chatInput(int sockfd){
         socklen_t len;
         int n = recvfrom(sockfd, (char *)buffer, MAXLINE, MSG_WAITALL, (struct sockaddr *) &servaddr, &len);
         buffer[n] = '\0';
+        if(!strcmp(buffer,"@")){
+            printf("you have left the room\n");
+            break;
+        }
         printf("%s\n", buffer);
     }
 }
@@ -26,10 +30,18 @@ void chatInput(int sockfd){
 void chatOutput(int sockfd, char clientName[MAXLINE]){
     while(1){
         char clientMsg[MAXLINE]="";
+        char msg[MAXLINE];
+        strcpy(msg,clientName);
         scanf("%[^\n]s", &clientMsg);
         getchar();
-        printf("You: %s", clientMsg);
-        char msg[MAXLINE];
+        if(!strcmp(clientMsg,"LEAVE ROOM")){
+            strcat(msg," &");    
+            sendto(sockfd, (const char *)msg, strlen(msg),
+            MSG_CONFIRM, (const struct sockaddr *) &servaddr,
+                sizeof(servaddr));
+            break;
+        }
+        printf("You: %s\n", clientMsg);
         strcpy(msg,clientName);
         strcat(msg,": ");
         strcat(msg,clientMsg);
@@ -58,9 +70,10 @@ int main() {
 	servaddr.sin_port = htons(PORT);
 	servaddr.sin_addr.s_addr = INADDR_ANY;
 	
-    printf("Please enter your name:\n");
+    printf("Please enter your name: ");
     scanf("%[^\n]s", clientName);
     getchar();
+    printf("welcome to the room!\n");
     char joinMsg[MAXLINE];
     strcpy(joinMsg,clientName);
     strcat(joinMsg," has joined!");

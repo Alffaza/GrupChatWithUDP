@@ -52,7 +52,13 @@ int main() {
 			n--;
 		}
         buffer[n] = '\0';
-        printf("%s\n", buffer);
+		if(buffer[n-1]=='&'){
+			sendto(sockfd, "@", 1, MSG_CONFIRM, (const struct sockaddr *) &cliaddr, len);
+			buffer[n-1]='\0';
+			strcat(buffer,"has left!");
+		}
+		
+		printf("%s\n", buffer);
         for(int i=0;i<groupMembers;i++)
 			if(allClients[i].sin_addr.s_addr!=cliaddr.sin_addr.s_addr || allClients[i].sin_port!=cliaddr.sin_port){
             	sendto(sockfd, (const char *)buffer, strlen(buffer), MSG_CONFIRM, (const struct sockaddr *) &allClients[i], len);
